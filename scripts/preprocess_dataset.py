@@ -23,16 +23,8 @@ import torch
 import torchvision
 import typer
 from pydantic import BaseModel
+from tqdm import tqdm
 from rich.console import Console
-from rich.progress import (
-    BarColumn,
-    MofNCompleteColumn,
-    Progress,
-    SpinnerColumn,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-)
 from torch.utils.data import DataLoader
 from transformers.utils.logging import disable_progress_bar
 
@@ -164,36 +156,16 @@ class DatasetPreprocessor:
         # Print dataset information
         console.print(f"Number of batches: {len(dataloader)} (batch size: {args.batch_size})")
 
-        # Create progress bars
-        progress = Progress(
-            SpinnerColumn(),
-            TextColumn("[bold blue]{task.description}"),
-            BarColumn(bar_width=40),
-            MofNCompleteColumn(),
-            TimeElapsedColumn(),
-            TextColumn("•"),
-            TimeRemainingColumn(),
-            console=console,
-        )
-
-        with progress:
-            # Process batches
-            task = progress.add_task(
-                "Processing dataset",
-                total=len(dataloader),
+        for batch_idx, batch in tqdm(enumerate(dataloader), total=len(dataloader), desc="Preprocessing Dataset"):
+            self._process_batch(
+                batch=batch,
+                batch_idx=batch_idx,
+                batch_size=args.batch_size,
+                latents_dir=latents_dir,
+                conditions_dir=conditions_dir,
+                output_base=output_base,
+                decode_videos=args.decode_videos,
             )
-
-            for batch_idx, batch in enumerate(dataloader):
-                self._process_batch(
-                    batch=batch,
-                    batch_idx=batch_idx,
-                    batch_size=args.batch_size,
-                    latents_dir=latents_dir,
-                    conditions_dir=conditions_dir,
-                    output_base=output_base,
-                    decode_videos=args.decode_videos,
-                )
-                progress.advance(task)
 
         # Print summary
         console.print(
