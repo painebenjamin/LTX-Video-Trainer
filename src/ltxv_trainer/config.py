@@ -1,13 +1,16 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, validator
 
 from ltxv_trainer.model_loader import LtxvModelVersion
 from ltxv_trainer.quantization import QuantizationOptions
 
 
 class ConfigBaseModel(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     model_config = ConfigDict(extra="forbid")
 
 
@@ -31,8 +34,7 @@ class ModelConfig(ConfigBaseModel):
     )
 
     # noinspection PyNestedDecorators
-    @field_validator("model_source", mode="before")
-    @classmethod
+    @validator("model_source")
     def validate_model_source(cls, v):  # noqa: ANN001, ANN206
         """Try to convert model source to LtxvModelVersion if possible."""
         if isinstance(v, (str, LtxvModelVersion)):
@@ -285,8 +287,7 @@ class LtxvTrainerConfig(ConfigBaseModel):
     )
 
     # noinspection PyNestedDecorators
-    @field_validator("output_dir")
-    @classmethod
+    @validator("output_dir")
     def expand_output_path(cls, v: str) -> str:
         """Expand user home directory in output path."""
         return str(Path(v).expanduser().resolve())
