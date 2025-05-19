@@ -417,8 +417,8 @@ class LtxvTrainer:
         # Prepare components with accelerator
         self._scheduler = components.scheduler
         self._tokenizer = components.tokenizer
-        self._text_encoder = prepare(components.text_encoder, device_placement=[False])
-        self._vae = prepare(components.vae, device_placement=[False])
+        self._text_encoder = components.text_encoder
+        self._vae = components.vae
         transformer = components.transformer
 
         if self._config.acceleration.quantization is not None:
