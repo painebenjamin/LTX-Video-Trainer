@@ -74,6 +74,8 @@ ModelSource = Union[str, Path, LtxvModelVersion]
 
 class LtxvModelComponents(BaseModel):
     """Container for all LTXV model components."""
+    class Config:
+        arbitrary_types_allowed = True
 
     scheduler: FlowMatchEulerDiscreteScheduler
     tokenizer: T5Tokenizer
